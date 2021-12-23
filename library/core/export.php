@@ -15,7 +15,7 @@ class export {
 
 	function __construct( \q\eud\plugin $plugin ){
 
-		$this->plugin = $plugin; 
+		$this->plugin = $plugin;
 
 	}
 
@@ -62,8 +62,8 @@ class export {
 
         // build argument array ##
         $args = array(
-            'fields'    => ( isset( $_POST['user_fields'] ) && '1' == $_POST['user_fields'] ) ? 
-                            'all' : 
+            'fields'    => ( isset( $_POST['user_fields'] ) && '1' == $_POST['user_fields'] ) ?
+                            'all' :
                             [ 'ID' ], // exclude standard wp_users fields from get_users query ##
             'role'      => \sanitize_text_field( $_POST['role'] )
         );
@@ -183,16 +183,16 @@ class export {
                 $doc_end    = "";
 
                 $writer = new \XLSXWriter();
-				
+
 			break;
 
         }
 
 
         // check for selected usermeta fields ##
-        $usermeta_fields = 
-			isset( $_POST['usermeta'] ) && is_array( $_POST['usermeta'] ) ? 
-			array_map( 'sanitize_text_field', $_POST['usermeta'] ) : 
+        $usermeta_fields =
+			isset( $_POST['usermeta'] ) && is_array( $_POST['usermeta'] ) ?
+			array_map( 'sanitize_text_field', $_POST['usermeta'] ) :
 			[];
         // h::log( $usermeta_fields );
 
@@ -322,10 +322,10 @@ class export {
 
 		// h::log( $headers );
 
-        if ( 
+        if (
 			$is_csv
 		){
-			
+
             // open doc wrapper.. ##
             \esc_html_e( $doc_begin );
 
@@ -344,7 +344,7 @@ class export {
             }
 
 			$writer->writeSheetHeader( 'Sheet1', $xlsx_header );
-			
+
         }
 
         // build row values for each user ##
@@ -402,10 +402,10 @@ class export {
 
 				/*
                 // check if this is a BP field ##
-                if ( 
-                    isset( $bp_data ) 
-                    && isset( $bp_data[$field] ) 
-                    && in_array( $field, $bp_fields_passed ) 
+                if (
+                    isset( $bp_data )
+                    && isset( $bp_data[$field] )
+                    && in_array( $field, $bp_fields_passed )
                 ){
 
                     // old way from single BP query ##
@@ -452,24 +452,24 @@ class export {
 
 					// empty array ##
 					$user_roles = [];
-					
+
 					// get usermeta data
 					$userdata = \get_userdata( $user->ID );
-						
+
 					// loop over roles, taking the name ##
 					foreach( $userdata->roles as $role ) {
 
 						$user_roles[] = \translate_user_role( $role );
-						
+
 					}
 
 					// test ##
 					// h::log( $user_roles );
 
 					// empty value if no role found - or flat array of user roles ##
-                    $value = 
-						! empty( $user_roles ) ? 
-						h::json_encode( $user_roles ) /*implode( '|', $user_roles )*/ : 
+                    $value =
+						! empty( $user_roles ) ?
+						h::json_encode( $user_roles ) /*implode( '|', $user_roles )*/ :
 						'';
 
                 // include the user's BP group in the export ##
@@ -513,9 +513,9 @@ class export {
 
 				*/
 				/*
-                } elseif ( 
+                } elseif (
 					( $field == 'bp_latest_update' && function_exists( 'bp_get_user_last_activity' ) )
-					|| $field == 'last_activity' 
+					|| $field == 'last_activity'
 				){
 
                     // https://bpdevel.wordpress.com/2014/02/21/user-last_activity-data-and-buddypress-2-0/ ##
@@ -526,8 +526,8 @@ class export {
                 } else {
 
                     // the user_meta key isset ##
-                    if ( 
-						isset( $get_user_meta[$field] ) 
+                    if (
+						isset( $get_user_meta[$field] )
 						&& is_array( $get_user_meta[$field] )
 					){
 
@@ -550,9 +550,9 @@ class export {
 				$value = h::unserialize( $value );
 
 				// the value is an array ##
-				if ( 
-					is_array ( $value ) 
-					|| is_object ( $value ) 
+				if (
+					is_array ( $value )
+					|| is_object ( $value )
 				){
 
 					// h::log( 'is_array || is_object' );
@@ -580,7 +580,11 @@ class export {
 
 			// escape array values ##
 			$data = array_map(function($x){
-				return esc_attr($x);
+        // KN TODO this escape destroys custom double-quote formatting applied by 'q/eud/export/value' filter
+				// return esc_attr($x);
+        // KN instead we wrap value in quotes, and esc html all in this step
+        $val = '"'. esc_html(esc_attr($x)) .'"';
+        return $val;
 			}, $data);
 
 			// h::log( $data );
@@ -591,13 +595,16 @@ class export {
 				$row_string = $pre.implode( $seperator, $data ).$breaker;
 
 				// echo headers ##
-				\esc_html_e( $row_string );
-				
+        // KN TODO this esc destroyes our desired double-quote formatting
+				// \esc_html_e( $row_string );
+        // KN instead we escape html above, and now we just echo the value
+        echo $row_string;
+
             } else {
 
 				// each value in the $data array has already been escaped via esc_attr ##
 				$writer->writeSheetRow( 'Sheet1', $data );
-				
+
             }
 
         }
@@ -606,19 +613,19 @@ class export {
 
             // close doc wrapper..
 			\esc_html_e( $doc_end );
-			
+
         } else {
 
 			// xss: all column headers and data values have been escaped previously ##
 			echo $writer->writeToString();
-			
+
         }
 
         // stop PHP, so file can export correctly ##
         exit;
 
     }
-    
+
     /**
     * Pre User Query
     *
@@ -659,15 +666,15 @@ class export {
 
 			// get last update string ##
 			$last_updated_date = new \DateTime( \sanitize_text_field ( $_POST['updated_since_date'] ) . ' 00:00:00' );
-			
+
 			// set date ##
 			$this->plugin->set( '_updated_since_date', $last_updated_date->format( 'Y-m-d H:i:s' ) );
-			
+
 			// set field ##
             $this->plugin->set( '_field_updated_since', \sanitize_text_field ( $_POST['bp_field_updated_since'] ) );
             $field_updated_since_id = \BP_Xprofile_Field::get_id_from_name( $this->plugin->get( '_field_updated_since' ) );
 			$user_search->query_from .=  " JOIN `wp_bp_xprofile_data` XP ON XP.user_id = wp_users.ID ";
-			
+
 			// set where string ##
             $where .= $wpdb->prepare( " AND XP.field_id = %s AND XP.last_updated >= %s", $field_updated_since_id, $this->plugin->get( '_updated_since_date' ) );
 

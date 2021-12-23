@@ -3,26 +3,26 @@
 /**
  * Export User Data
  *
- * @package         Export User Data
+ * @package         Export User Data - KN edit
  * @author          Q Studio <social@qstudio.us>
  * @license         GPL-2.0+
  * @copyright       2020 Q Studio
  *
  * @wordpress-plugin
- * Plugin Name:     Export User Data
- * Plugin URI:      http://qstudio.us/releases/export-user-data
+ * Plugin Name:     Export User Data - KN edit
+ * Plugin URI:      https://github.com/KyleNumann/export-user-data
  * Description:     Export User data and metadata.
- * Version:         2.2.5
+ * Version:         2.2.5.1
  * Author:          Q Studio
  * Author URI:      https://qstudio.us
  * License:         GPL-2.0+
- * Requires PHP:    7.0 
+ * Requires PHP:    7.0
  * Copyright:       Q Studio
  * Namespace:		q\eud
  * API:        		export_user_data
  * Text Domain:     export-user-data
  * Domain Path:     /languages
- * GitHub Plugin URI: qstudio/export-user-data
+ * GitHub Plugin URI: KyleNumann/export-user-data
 */
 
 // namespace plugin ##
@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // required bits to get set-up ##
 require_once __DIR__ . '/library/api/function.php';
-require_once __DIR__ . '/autoload.php'; 
+require_once __DIR__ . '/autoload.php';
 require_once __DIR__ . '/plugin.php';
 require_once __DIR__ . '/vendor/PHP_XLSXWriter/xlsxwriter.class.php';
 
@@ -62,12 +62,12 @@ if( ! ( $_plugin instanceof \q\eud\plugin ) ) {
 
 }
 
-// fire hooks - build log, helper and config objects and translations ## 
+// fire hooks - build log, helper and config objects and translations ##
 \add_action( 'init', function() use( $_plugin ){
 
 	// set text domain on init hook ##
 	\add_action( 'init', [ $_plugin, 'load_plugin_textdomain' ], 1 );
-	
+
 	// check debug settings ##
 	\add_action( 'plugins_loaded', [ $_plugin, 'debug' ], 11 );
 
