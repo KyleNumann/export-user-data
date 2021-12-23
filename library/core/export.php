@@ -580,9 +580,32 @@ class export {
 
 			// escape array values ##
 			$data = array_map(function($x){
-        // KN TODO this escape destroys custom double-quote formatting applied by 'q/eud/export/value' filter
+        // KN - this escape destroys custom double-quote formatting applied by 'q/eud/export/value' filter
 				// return esc_attr($x);
-        // KN instead we wrap value in quotes, and esc html all in this step
+
+        // KN - test for json data, reformat if found
+        $result = json_decode($x, true);
+        // KN - if json is valid, and if value is not numbers-only
+        if (json_last_error() === JSON_ERROR_NONE && !preg_match('/^[0-9]*$/', $x)) {
+            // JSON is valid, and not just a number
+            $x = implode(", ", $result);
+
+
+
+            // KN TODO - make this file URL actually work
+            // if this is file upload field, find URL
+            $result_0 = $result[0];
+            // if first array item is a URL, this is likely the file upload field
+            if(strpos($result_0, 'http') !== false){
+              // $x = 'url: '. $result_0;
+              // global $ultimatemember;
+              // $x = $ultimatemember->files()->get_download_link( UM()->fields()->set_id, $result[5], um_user( 'ID' ) );
+            }
+
+
+
+        }
+        // KN - instead we wrap value in quotes, and esc html all in this step
         $val = '"'. esc_html(esc_attr($x)) .'"';
         return $val;
 			}, $data);
@@ -595,7 +618,7 @@ class export {
 				$row_string = $pre.implode( $seperator, $data ).$breaker;
 
 				// echo headers ##
-        // KN TODO this esc destroyes our desired double-quote formatting
+        // KN - this esc destroyes our desired double-quote formatting
 				// \esc_html_e( $row_string );
         // KN instead we escape html above, and now we just echo the value
         echo $row_string;
