@@ -579,7 +579,9 @@ class export {
             }
 
 			// escape array values ##
-			$data = array_map(function($x){
+      // KN - added user ID to function arguments
+			$data = array_map(function($x, $userid){
+        $kntest = 'test-by-kn';
         // KN - this escape destroys custom double-quote formatting applied by 'q/eud/export/value' filter
 				// return esc_attr($x);
 
@@ -597,6 +599,20 @@ class export {
             $result_0 = $result[0];
             // if first array item is a URL, this is likely the file upload field
             if(strpos($result_0, 'http') !== false){
+
+              \um_fetch_user( $userid );
+              $ys = \um_user('submitted');
+              foreach($ys as $y){
+                $x .= $y .' ,,, ';
+              }
+              \um_reset_user();
+              // $x = 'testing';
+
+              // $form_id = 1332; // UM form ID
+              // $field_key = 'resume_file'; // UM field key
+
+              // $uri = UM()->files()->get_download_link( $form_id, $data['metakey'], um_user( 'ID' ) );
+
               // $x = 'url: '. $result_0;
               // global $ultimatemember;
               // $x = $ultimatemember->files()->get_download_link( UM()->fields()->set_id, $result[5], um_user( 'ID' ) );
@@ -607,8 +623,12 @@ class export {
         }
         // KN - instead we wrap value in quotes, and esc html all in this step
         $val = '"'. esc_html(esc_attr($x)) .'"';
+        // $val = '"'. $x .'"';
         return $val;
-			}, $data);
+			},
+      $data,
+      array_fill(0, count($data), $user->ID), // KN - pass 2nd argument of user->ID, must be in array for array_map
+      );
 
 			// h::log( $data );
 
